@@ -38,7 +38,7 @@ impl AsyncMQueue {
         }
     }
 }
-
+impl Unpin for AsyncMQueue {}
 impl AsyncRead for AsyncMQueue {
     fn poll_read(
         self: std::pin::Pin<&mut Self>,

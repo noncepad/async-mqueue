@@ -28,7 +28,7 @@ dependencies = [
 
 [[package]]
 name = "async-mqueue"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "env_logger",
  "futures",

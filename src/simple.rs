@@ -2,7 +2,7 @@ use crate::am::AsyncMQueue;
 use crate::{am, mqueue};
 use nix::mqueue::MQ_OFlag;
 use nix::sys::stat::Mode;
-
+pub const DEFAULT_MESSAGE_SIZE: usize = 8192;
 /// Create a mqueue.
 pub fn create(
     mpath: String,
@@ -41,7 +41,15 @@ fn inside_open(
     } else {
         10
     };
-    let size = if let Some(x) = msg_size { x } else { 4096 };
+    let size = if let Some(x) = msg_size {
+        assert!(
+            x < DEFAULT_MESSAGE_SIZE,
+            "max mq size is DEFAULT_MESSAGE_SIZE"
+        );
+        x
+    } else {
+        DEFAULT_MESSAGE_SIZE
+    };
     //    warn!(
     //       "inside_open - 1 - create {}; channel {:?}; size {:?}",
     //     create, msg_channel_size, msg_size

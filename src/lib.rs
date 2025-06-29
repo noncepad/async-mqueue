@@ -9,6 +9,8 @@ pub fn add(left: u64, right: u64) -> u64 {
 mod tests {
     use std::time::Duration;
 
+    use self::simple::DEFAULT_MESSAGE_SIZE;
+
     // Import the `tokio::test` macro
     use super::*;
     use log::info;
@@ -19,7 +21,7 @@ mod tests {
     async fn it_works() -> Result<(), Box<dyn std::error::Error>> {
         env_logger::init().unwrap();
         let mut handlers = vec![];
-        let mpath = String::from("/mqueue4");
+        let mpath = String::from("/mqueue0");
         let start = 10;
         {
             let s1 = start;
@@ -47,7 +49,7 @@ mod tests {
         sleep(Duration::from_secs(2)).await;
         let mq = simple::open(mpath, None, None)?;
         info!("recv - 2");
-        let mut data = [0; 4096];
+        let mut data = [0; DEFAULT_MESSAGE_SIZE];
         let mut i = start;
         while 0 < i {
             i -= 1;
