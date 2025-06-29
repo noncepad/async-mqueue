@@ -1,5 +1,6 @@
 pub mod am;
 pub mod mqueue;
+pub mod simple;
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
 }
@@ -10,9 +11,7 @@ mod tests {
 
     // Import the `tokio::test` macro
     use super::*;
-    use log::warn;
-    use nix::mqueue::MQ_OFlag;
-    use nix::sys::stat::Mode;
+    use log::info;
     use tokio::test;
     use tokio::time::sleep;
 
@@ -20,7 +19,7 @@ mod tests {
     async fn it_works() -> Result<(), Box<dyn std::error::Error>> {
         env_logger::init().unwrap();
         let mut handlers = vec![];
-        let mpath = String::from("/mqueue2");
+        let mpath = String::from("/mqueue4");
         let start = 10;
         {
             let s1 = start;
@@ -44,49 +43,37 @@ mod tests {
     }
 
     async fn recv(start: usize, mpath: String) -> Result<(), Box<dyn std::error::Error>> {
-        let attr = Some(mqueue::MqAttr::new(0, 10, 4096, 0));
-        let name = std::ffi::CString::new(mpath.as_str()).unwrap();
-        let mq = mqueue::mq_open(
-            &name,
-            MQ_OFlag::O_RDWR | MQ_OFlag::O_CREAT | MQ_OFlag::O_NONBLOCK,
-            Mode::S_IWUSR | Mode::S_IRUSR | Mode::S_IRGRP | Mode::S_IROTH,
-            attr.as_ref(),
-        )?;
-
-        let mq = am::AsyncMQueue::from(mq);
-
+        info!("recv - 1");
+        sleep(Duration::from_secs(2)).await;
+        let mq = simple::open(mpath, None, None)?;
+        info!("recv - 2");
         let mut data = [0; 4096];
         let mut i = start;
         while 0 < i {
             i -= 1;
             let size = mq.read(&mut data).await?;
-            warn!("receiving bytes {}; i {}", size, i);
+            info!("receiving bytes {}; i {}", size, i);
         }
+        info!("recv - 3");
         Ok(())
     }
 
     async fn send(start: usize, mpath: String) -> Result<(), Box<dyn std::error::Error>> {
-        let attr = Some(mqueue::MqAttr::new(0, 10, 4096, 0));
-        let name = std::ffi::CString::new(mpath.as_str()).unwrap();
-        let mq = mqueue::mq_open(
-            &name,
-            MQ_OFlag::O_RDWR | MQ_OFlag::O_CREAT | MQ_OFlag::O_NONBLOCK,
-            Mode::S_IWUSR | Mode::S_IRUSR | Mode::S_IRGRP | Mode::S_IROTH,
-            attr.as_ref(),
-        )?;
-
-        let mq = am::AsyncMQueue::from(mq);
-
+        info!("send - 1");
+        let mq = simple::create(mpath.clone(), None, None)?;
+        info!("send - 2");
         let mut data = [0; 16];
         let mut i = start;
         while 0 < i {
             tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-            warn!("sending i {}", i);
+            info!("sending i {}", i);
             mq.write(&mut data).await?;
             i -= 1;
         }
+        info!("send - 3");
         sleep(Duration::from_secs(10)).await;
-        mqueue::mq_unlink(&name)?;
+        simple::unlink(mpath)?;
+        info!("send - 4");
         Ok(())
     }
 }

@@ -5,8 +5,9 @@ edition = "2021"
 authors = ["Maintainers <maintainers@noncepad.com>"]
 repository = "https://github.com/noncepad/async-mqueue"
 [dependencies]
-log = "0.4"
-env_logger = "0.4"
 futures = "0.3"
 nix = { version = "0.30.1", features = ["mqueue"] }
 tokio = { version = "1.45.1", features = ["full"] }
+[dev-dependencies]
+log = "0.4"
+env_logger = "0.4"

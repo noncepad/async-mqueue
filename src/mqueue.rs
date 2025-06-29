@@ -1,9 +1,8 @@
 use nix::errno::Errno;
-use nix::Result;
-
 use nix::libc::{self, c_char, mqd_t, size_t};
 use nix::mqueue::MQ_OFlag;
 use nix::sys::stat::Mode;
+use nix::Result;
 use std::ffi::CStr;
 use std::mem;
 
